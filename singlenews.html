@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>CREDO NEWS</title>
     <link rel="stylesheet" href="main.css">
 </head>
 
@@ -80,20 +80,22 @@
 
       <form id="comment-form">
         <div class="form-group">
-            <label for="comment-name">Name:</label>
-        <input type="text" id="comment-name" name="name">
+            <label for="commentname">Name:</label>
+        <input type="text" id="commentname" name="name">
         </div>
         <div class="form-group">
             <label for="avatar">Avatar:</label>
             <input type="text" id="avatar" name="avatar">
            </div>
        <div class="form-group">
-        <label for="comment-body">Comment:</label>
-        <textarea id="comment-body" name="body"></textarea>
+        <label for="commentbody">Comment:</label>
+        <textarea id="commentbody" name="body"></textarea>
        </div>
        
         <div>
-            <button type="submit" class="btn">Add Comment</button>
+            <button type="submit" id="addcomment" class="btn">Add Comment</button>
+
+            <button type="submit" id="updatecomment" class="btn">Update Comment</button>
         </div>
       </form>
 
@@ -106,9 +108,9 @@
       
 <script>
 
-    // GET ALL NEWS
+    
 
-
+      ////// GET ALL NEWS /////
     // Get the URL parameter string
     const queryString = window.location.search;
 
@@ -119,13 +121,11 @@
     const id = urlParams.get('id');
 
     // Log the ID to the console
-    console.log(id);
+    // console.log(id);
 
 
     // Get the output element
     var output = document.getElementById("output");
-
-
     fetch('https://64105fcb864814e5b64f9a34.mockapi.io/credo/v1/news/' + id, {
     method: 'GET',
     headers: {'content-type':'application/json'},
@@ -135,22 +135,23 @@
     }
     }).then(data => {
         // Do something with the list of news
-        console.log(data);
+        // console.log(data);
             // Update the output element with API data
-    output.innerHTML =  `
+        output.innerHTML =  `
             <div>
                 <img style="width: 100%;" src="${data.avatar}" alt="">
                 <h1 style="font-weight:bold">${data.title}</h1>
                 <p style="font-weight: bold;">Author: ${data.author}</p>
                 <p style="font-size:14px; text-align: justify;">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ipsa culpa libero voluptatem provident...</p>
-               
+                <hr>
+                <div style="margin-top:1rem; margin-bottom:1rem;"><button onclick="window.location.assign('addnews.html?id=${data.id}&avatar=${data.avatar}&title=${data.title}&author=${data.author}&url=${data.url}')" style="border:none; font-weight:bold; cursor:pointer; background:white; color:blue; font-size:15px">Update News</button></div>
                 <hr><br /><br /><br /><br /><br /> 
             </div> 
             `;
-    }).catch(error => {
-    // handle error
-    console.log(error);
-    })
+      }).catch(error => {
+      // handle error
+      console.log(error);
+      })
 
 
 
@@ -170,9 +171,9 @@
         event.preventDefault();
 
         // Get the values of the name and body inputs
-        const nameInput = document.getElementById('comment-name');
+        const nameInput = document.getElementById('commentname');
         const avatarInput = document.getElementById('avatar');
-        const commentInput = document.getElementById('comment-body');
+        const commentInput = document.getElementById('commentbody');
         const name = nameInput.value.trim();
         const avatar = avatarInput.value.trim();
         const comment = commentInput.value.trim();
@@ -183,9 +184,9 @@
             return;
         }
         
-        // Get the blog post id from the URL or another source
+        // Get the news post id from the URL or another source
         const commentid = urlParams.get('id');
-        console.log(commentid);
+        // console.log(commentid);
 
         // Create a new comment object
         const newComment = {
@@ -207,11 +208,7 @@
         .then(response => {
             if (response.ok) {
             // If the response is successful, add the new comment to the UI
-            const commentList = document.getElementById('comment-list');
-            const newCommentElement = document.createElement('li');
-            newCommentElement.textContent = `${name}: ${avatar} : ${comment}`;
-            // commentList.appendChild(newCommentElement);
-
+            location.reload();
             // Clear the form inputs
             nameInput.value = '';
             avatarInput.value = '';
@@ -231,9 +228,7 @@
 
 
 
-
-
-
+      
 
     //// GET COMMENTS /////
     fetch('https://64105fcb864814e5b64f9a34.mockapi.io/credo/v1/comments', {
@@ -245,7 +240,7 @@
     }
     }).then(data => {
         // Do something with the list of news
-        console.log(data);
+        // console.log(data);
         data.forEach(function(comment){
             // Update the output element with API data
             if (comment.commentid === id) {
@@ -256,17 +251,142 @@
               <h3>${comment.name}</h3>
             </div>
             <p>${comment.comment}</p>
+            <button onclick="window.location.assign('singlenews.html?id=${comment.commentid}&commentid=${comment.id}&name=${comment.name}&avatar=${comment.avatar}&comment=${comment.comment}')" class="delete-comment" style="border:none; font-weight:bold; cursor:pointer; background:white; color:blue">Edit</button>
+            <button onclick="window.location.assign('singlenews.html?id=${comment.commentid}&deleteid=${comment.id}')" class="delete-comment" style="border:none; font-weight:bold; cursor:pointer; background:white; color:red">Delete</button>
           </li> 
             `;
-         document.getElementById('newscomments').insertAdjacentHTML('beforeend', newscomments);
-    }
-    })
-    }).catch(error => {
-    // handle error
-    console.log(error);
-    })
+            document.getElementById('newscomments').insertAdjacentHTML('beforeend', newscomments);
+          }
+        })
+      }).catch(error => {
+      // handle error
+      console.log(error);
+      });
 
 
+
+
+
+    ////// UPDATE COMMENT //////
+    // Get the comment ID from the URL parameter (e.g. using URLSearchParams)
+      const commenturlParams = new URLSearchParams(window.location.search);
+      const commentId = commenturlParams.get('commentid');
+      const avatar = commenturlParams.get('avatar');
+      const name = commenturlParams.get('name');
+      const comment = commenturlParams.get('comment');
+
+      // console.log(commentId, avatar, name, comment);
+
+      const nameresult = document.getElementById("commentname");
+      nameresult.value = name;
+
+      const avatarresult = document.getElementById("avatar");
+      avatarresult.value = avatar;
+
+      const commentresult = document.getElementById("commentbody");
+      commentresult.value = comment;
+
+
+      if (commentId === null) {
+        document.getElementById('updatecomment').style.display = 'none';
+      }else{
+        document.getElementById('addcomment').style.display = 'none';
+      }
+
+      // Get the comment form element
+      const commentsForm = document.getElementById('comment-form');
+
+      // Add an event listener to the comment form
+      updatecomment.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        // Get the new comment details from the form
+        const commentName = document.getElementById('commentname').value;
+        const avatar = document.getElementById('avatar').value;
+        const commentBody = document.getElementById('commentbody').value;
+
+
+        // Fetch the existing comment from the API
+        fetch(`https://64105fcb864814e5b64f9a34.mockapi.io/credo/v1/comments/${commentId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(comment => {
+          // Update the comment object with the new values
+          comment.name = commentName;
+          comment.avatar = avatar;
+          comment.comment = commentBody;
+
+          // Use the HTTP PUT method to update the comment in the API
+          fetch(`https://64105fcb864814e5b64f9a34.mockapi.io/credo/v1/comments/${commentId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(comment)
+          })
+          .then(response => {
+            // Display a success message to the user
+            alert('Comment updated successfully!');
+            window.location.assign(`singlenews.html?id=${id}`);
+          })
+          .catch(error => {
+            console.error('Error updating comment:', error);
+            alert('Error updating comment. Please try again later.');
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching comment:', error);
+          alert('Error fetching comment. Please try again later.');
+        });
+      });
+
+
+  
+
+
+        //// DELETE NEW COMMENT ///
+        // Get the URL parameter string
+        const deletequeryString = window.location.search;
+        
+        // Parse the query string to get the parameters as an object
+        const deleteurlParams = new URLSearchParams(deletequeryString);
+        
+        // Get the value of the "id" parameter
+        const deleteid = deleteurlParams.get('id');
+        const dcommentid = deleteurlParams.get('deleteid');
+
+        // Log the ID to the console
+        // console.log(deleteid);
+    
+      if (dcommentid === null) {
+          }else{
+            function deleteComment(deleteid, dcommentid) {
+
+              // console.log(deleteid, dcommentid);
+              // Send DELETE request to API with comment ID
+              fetch(`https://64105fcb864814e5b64f9a34.mockapi.io/credo/v1/comments/${dcommentid}`, {
+                method: 'DELETE'
+              })
+              .then(response => {
+                // Handle successful response from API
+                alert('Comment deleted');
+              window.location.assign(`singlenews.html?id=${deleteid}`)
+                // Reload the page to show the updated comments
+                // location.reload();
+              })
+              .catch(error => {
+                // Handle error from API
+                console.error('Error deleting comment:', error);
+              });
+            }
+            deleteComment(deleteid, dcommentid);
+        }
+
+   
 </script>
 </body>
 </html>
