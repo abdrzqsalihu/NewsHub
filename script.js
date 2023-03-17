@@ -27,10 +27,10 @@ function nextSlide() {
     } else {
         counter = 0;
     }
-    sliderImages.style.transform = `translateX(-${counter * 25}%)`;
+    sliderImages.style.transform = `translateX(-${counter *25}%)`;
 }
 
-const slideInterval = setInterval(nextSlide, 5000); // change the interval time as per your requirement
+const slideInterval = setInterval(nextSlide, 2000); // change the interval time as per your requirement
 
 nextBtns.addEventListener('click', () => {
     clearInterval(slideInterval); // stop the automatic slide when the next button is clicked
